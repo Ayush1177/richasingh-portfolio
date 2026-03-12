@@ -12,12 +12,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* removed prefers-color-scheme media query so the toggle fully controls theme */
 
 body {
   background: var(--background);
@@ -27,13 +22,18 @@ body {
 
 /* Global page grid background: black + vertical thin lines */
 .page-grid-bg {
-  background-color: #000000f4;
+  background-color: var(--background);
   background-image: linear-gradient(
     to right,
     rgba(148, 163, 184, 0.15) 1px,
     transparent 1px
   );
   background-size: 80px 100%;
+}
+
+/* helper to force text to use the current foreground color */
+.text-foreground {
+  color: var(--foreground);
 }
 
 /* Playground auto-scroll animation */
