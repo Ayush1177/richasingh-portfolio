@@ -12,35 +12,30 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* removed prefers-color-scheme media query so the toggle fully controls theme */
-
+/* Let the toggle fully control the theme */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Global page grid background: black + vertical thin lines */
 .page-grid-bg {
   background-color: var(--background);
-  background-image: linear-gradient(
-    to right,
-    rgba(148, 163, 184, 0.15) 1px,
-    transparent 1px
-  );
+  background-image: linear-gradient(to right,
+      rgba(148, 163, 184, 0.15) 1px,
+      transparent 1px);
   background-size: 80px 100%;
 }
 
-/* helper to force text to use the current foreground color */
 .text-foreground {
   color: var(--foreground);
 }
 
-/* Playground auto-scroll animation */
 @keyframes playground-scroll {
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
@@ -50,4 +45,21 @@ body {
   display: flex;
   width: max-content;
   animation: playground-scroll 40s linear infinite;
+}
+
+@media (pointer: fine) {
+
+  html,
+  body,
+  a,
+  button,
+  [role="button"] {
+    cursor: none !important;
+  }
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
 }

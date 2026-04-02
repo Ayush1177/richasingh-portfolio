@@ -1,69 +1,68 @@
 "use client";
 
-import * as React from "react";
-import {
-    AnimatePresence,
-    motion,
-    type HTMLMotionProps,
-    type Transition,
-} from "motion/react";
-
-function cn(...classes: Array<string | undefined | false>) {
-    return classes.filter(Boolean).join(" ");
-}
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 
 type RotatingTextProps = {
     text: string[];
     colors?: (string | undefined)[];
     durationMs?: number;
     slideOffset?: number;
-    transition?: Transition;
     className?: string;
-} & Omit<HTMLMotionProps<"div">, "children">;
+};
 
-function RotatingText({
+export default function RotatingText({
     text,
-    colors,
+    colors = [],
     durationMs = 2500,
-    slideOffset = 40,
-    transition = { duration: 0.35, ease: "easeOut" },
-    className,
-    ...props
+    slideOffset = 10,
+    className = "",
 }: RotatingTextProps) {
-    const [index, setIndex] = React.useState(0);
+    const items = useMemo(() => text.filter(Boolean), [text]);
+    const [index, setIndex] = useState(0);
 
-    React.useEffect(() => {
-        if (!text || text.length === 0) return;
-        const interval = setInterval(
-            () => setIndex((prev) => (prev + 1) % text.length),
-            durationMs
-        );
-        return () => clearInterval(interval);
-    }, [text, durationMs]);
+    useEffect(() => {
+        if (items.length <= 1) return;
 
-    if (!text || text.length === 0) return null;
+        const timer = window.setInterval(() => {
+            setIndex((prev) => (prev + 1) % items.length);
+        }, durationMs);
 
-    const current = text[index];
-    const currentColor = colors?.[index];
+        return () => window.clearInterval(timer);
+    }, [items.length, durationMs]);
+
+    if (!items.length) return null;
+
+    const activeText = items[index];
+    const activeColor = colors[index];
 
     return (
-        <div className={cn("overflow-hidden py-1", className)}>
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={current}
-                    initial={{ opacity: 0, y: -slideOffset }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: slideOffset }}
-                    transition={transition}
-                    style={{ color: currentColor || "var(--foreground)" }}
-                    {...(props as any)}
-                >
-                    {current}
-                </motion.div>
-            </AnimatePresence>
-        </div>
+        <span className={`relative inline-flex min-h-[1.2em] items-center ${className}`}>
+            <span className="relative inline-block">
+                <span className="invisible whitespace-nowrap">
+                    {items.reduce((a, b) => (a.length > b.length ? a : b), "")}
+                </span>
+
+                <AnimatePresence initial={false} mode="sync">
+                    <motion.span
+                        key={`${activeText}-${index}`}
+                        className="absolute inset-0 whitespace-nowrap"
+                        initial={{ opacity: 0, y: slideOffset, filter: "blur(8px)" }}
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, y: -slideOffset, filter: "blur(8px)" }}
+                        transition={{
+                            duration: 0.90,
+                            ease: [0.22, 1, 0.36, 1],
+                        }}
+                        style={{
+                            color: activeColor || "currentColor",
+                            willChange: "transform, opacity, filter",
+                        }}
+                    >
+                        {activeText}
+                    </motion.span>
+                </AnimatePresence>
+            </span>
+        </span>
     );
 }
-
-export { RotatingText, type RotatingTextProps };
-export default RotatingText;
