@@ -62,7 +62,6 @@ export const project = defineType({
       title: "Case Study URL",
       type: "url",
     }),
-    // NEW: color for stacks
     defineField({
       name: "stackColor",
       title: "Stack color",

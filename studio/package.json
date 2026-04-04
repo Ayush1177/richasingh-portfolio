@@ -16,17 +16,19 @@
   ],
   "dependencies": {
     "@sanity/color-input": "^6.0.4",
-    "@sanity/vision": "^5.14.1",
+    "@sanity/vision": "^5.18.0",
     "react": "^19.1",
     "react-dom": "^19.1",
-    "sanity": "^5.14.1",
-    "styled-components": "^6.1.18"
+    "sanity": "^5.18.0",
+    "styled-components": "^6.1.18",
+    "vite": "^8.0.3"
   },
   "devDependencies": {
     "@sanity/eslint-config-studio": "^6.0.0",
     "@types/react": "^19.1",
     "eslint": "^9.28",
     "prettier": "^3.5",
+    "rollup": "^4.60.0",
     "typescript": "^5.8"
   },
   "prettier": {

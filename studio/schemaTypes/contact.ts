@@ -1,4 +1,3 @@
-// studio/schemaTypes/contact.ts
 import { defineType, defineField } from "sanity";
 
 export const contact = defineType({
@@ -19,27 +18,80 @@ export const contact = defineType({
     defineField({
       name: "email",
       title: "Email",
+      type: "email",
+    }),
+    defineField({
+      name: "links",
+      title: "Links",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          fields: [
+            defineField({
+              name: "label",
+              title: "Label",
+              type: "string",
+            }),
+            defineField({
+              name: "url",
+              title: "URL or mailto",
+              type: "string",
+              validation: (Rule) =>
+                Rule.custom((value) => {
+                  if (!value) return true;
+
+                  if (
+                    value.startsWith("https://") ||
+                    value.startsWith("http://") ||
+                    value.startsWith("mailto:")
+                  ) {
+                    return true;
+                  }
+
+                  return "Use https://, http://, or mailto:";
+                }),
+            }),
+            defineField({
+              name: "icon",
+              title: "Icon",
+              type: "image",
+              options: {
+                hotspot: true,
+              },
+            }),
+          ],
+          preview: {
+            select: {
+              title: "label",
+              subtitle: "url",
+              media: "icon",
+            },
+          },
+        },
+      ],
+    }),
+    defineField({
+      name: "resumeLabel",
+      title: "Resume Label",
       type: "string",
+      initialValue: "Resume",
     }),
     defineField({
-      name: "portfolioLink",
-      title: "Primary link label",
-      type: "string",
+      name: "resume",
+      title: "Resume PDF",
+      type: "file",
+      options: {
+        accept: "application/pdf",
+      },
     }),
     defineField({
-      name: "portfolioUrl",
-      title: "Primary link URL",
-      type: "url",
-    }),
-    defineField({
-      name: "secondaryLabel",
-      title: "Secondary link label",
-      type: "string",
-    }),
-    defineField({
-      name: "secondaryUrl",
-      title: "Secondary link URL",
-      type: "url",
+      name: "resumeIcon",
+      title: "Resume Icon",
+      type: "image",
+      options: {
+        hotspot: true,
+      },
     }),
   ],
 });
