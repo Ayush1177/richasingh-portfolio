@@ -7,46 +7,64 @@ import ThemeToggle from "../components/ThemeToggle";
 import RotatingText from "../components/RotatingText";
 import CustomCursor from "../components/CustomCursor";
 
-const heroQuery = groq`*[_type == "hero"][0]`;
+const heroQuery = groq`*[_type == "hero"][0]{
+  greeting,
+  line1,
+  line1Color,
+  line2,
+  line2Color,
+  rotatingLines[]{
+    text,
+    color
+  },
+  currentRole,
+  roleColor,
+  roleDotColor,
+  heroImages[]{
+    alt,
+    rotation,
+    image
+  }
+}`;
 
 const profileQuery = groq`*[_type == "profile"][0]{
-   name, 
-   headline, 
-   bio, 
-   introLine,
-   aboutLong, 
-   avatar,
-   location, 
-   locationSubtext,
-   currentRole,
-   currentRoleSubtext,
-   education,
-   educationSubtext,
-   featuredSection{
-      label,
-      title,
-      description,
-      image,
-      link,
-      linkLabel
-    },
-    stackItems[]{
-      title,
-      subtitle,
-      icon
-    },
-    experience[]{
-      period,
-      company,
-      role,
-      description
-    },
-    socials[]{
-      label,
-      url
-    }
-  }
-`;
+  name,
+  headline,
+  bio,
+  introLine,
+  aboutLong,
+  avatar,
+  location,
+  locationSubtext,
+  currentRole,
+  currentRoleSubtext,
+  education,
+  educationSubtext,
+  featuredSection{
+    label,
+    title,
+    description,
+    image,
+    link,
+    linkLabel
+  },
+  stackItems[]{
+    title,
+    subtitle,
+    icon
+  },
+  experience[]{
+    period,
+    company,
+    role,
+    description
+  },
+  socials[]{
+  label,
+  url,
+  icon
+}
+}`;
 
 const projectsQuery = groq`*[_type == "project"] | order(year desc){
   _id,
@@ -64,11 +82,25 @@ const playgroundQuery = groq`*[_type == "playgroundItem"] | order(year desc, _cr
 
 const notesQuery = groq`*[_type == "note"] | order(date desc)[0..2]`;
 
-const contactQuery = groq`*[_type == "contact"][0]`;
+const contactQuery = groq`*[_type == "contact"][0]{
+  headline,
+  body,
+  email,
+  links[]{
+    label,
+    url
+  }
+}`;
 
 type RotatingLine = {
   text?: string;
   color?: { hex?: string };
+};
+
+type HeroImageItem = {
+  alt?: string;
+  rotation?: number;
+  image?: any;
 };
 
 type Hero = {
@@ -81,11 +113,13 @@ type Hero = {
   currentRole?: string;
   roleColor?: { hex?: string };
   roleDotColor?: { hex?: string };
+  heroImages?: HeroImageItem[];
 };
 
 type SocialLink = {
   label?: string;
   url?: string;
+  icon?: any;
 };
 
 type StackItem = {
@@ -156,14 +190,16 @@ type Note = {
   type?: string;
 };
 
+type ContactLink = {
+  label?: string;
+  url?: string;
+};
+
 type Contact = {
   headline?: string;
   body?: string;
   email?: string;
-  portfolioLink?: string;
-  portfolioUrl?: string;
-  secondaryLabel?: string;
-  secondaryUrl?: string;
+  links?: ContactLink[];
 };
 
 type HomeProps = {
@@ -304,6 +340,89 @@ function EditorialProjectCard({
         <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-white/0 via-white/5 to-white/0" />
       </div>
     </motion.button>
+  );
+}
+
+function HeroImageStack({
+  images = [],
+}: {
+  images?: { alt?: string; rotation?: number; image?: any }[];
+}) {
+  const validImages = images.filter((item) => item?.image);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (validImages.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % validImages.length);
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [validImages.length]);
+
+  if (!validImages.length) {
+    return (
+      <div className="relative mx-auto h-[340px] w-[260px] sm:h-[400px] sm:w-[300px] md:h-[460px] md:w-[340px] rounded-[2rem] border border-white/10 bg-white/[0.03]" />
+    );
+  }
+
+  return (
+    <div className="relative mx-auto h-[340px] w-[260px] sm:h-[400px] sm:w-[300px] md:h-[460px] md:w-[340px]">
+      {validImages.map((item, index) => {
+        const isActive = index === activeIndex;
+
+        const fallbackRotations = [-8, 6, -5, 4, -3];
+        const fallbackX = [-10, 12, -8, 10, -6];
+        const fallbackY = [8, -6, 12, -4, 6];
+
+        const rotate =
+          item.rotation ?? fallbackRotations[index % fallbackRotations.length];
+        const x = fallbackX[index % fallbackX.length];
+        const y = fallbackY[index % fallbackY.length];
+
+        return (
+          <motion.div
+            key={`${item.alt || "hero-image"}-${index}`}
+            className="absolute inset-0 flex items-center justify-center"
+            animate={{ zIndex: isActive ? 20 : index + 1 }}
+          >
+            <motion.div
+              initial={false}
+              animate={
+                isActive
+                  ? {
+                    scale: 1,
+                    rotate: 0,
+                    x: 0,
+                    y: 0,
+                    opacity: 1,
+                  }
+                  : {
+                    scale: 0.94,
+                    rotate,
+                    x,
+                    y,
+                    opacity: 0.78,
+                  }
+              }
+              transition={{
+                duration: 0.75,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="absolute h-[88%] w-[86%] overflow-hidden rounded-[1.6rem] border border-white/10 bg-zinc-900 shadow-[0_30px_80px_rgba(0,0,0,0.45)]"
+            >
+              <img
+                src={urlFor(item.image).width(1200).height(1600).url()}
+                alt={item.alt || "Hero image"}
+                className="h-full w-full object-cover"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
+            </motion.div>
+          </motion.div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -484,7 +603,8 @@ export default function Home({
           <div className="absolute bottom-0 left-1/2 h-72 w-[40rem] -translate-x-1/2 translate-y-1/3 rounded-[999px] bg-gradient-to-r from-purple-500/8 via-fuchsia-500/10 to-cyan-400/8 dark:from-purple-500/20 dark:via-fuchsia-500/25 dark:to-cyan-400/20 blur-3xl" />
         </div>
 
-        <section className="max-w-6xl mx-auto px-6 pt-0 pb-24 border-t border-black/10 dark:border-white/10">
+        {/* HERO */}
+        <section className="max-w-6xl mx-auto px-6 pt-0 pb-8 border-t border-black/10 dark:border-white/10">
           <div className="flex items-start justify-between mb-16">
             <p className="text-base md:text-lg text-zinc-900 dark:text-zinc-100">
               {hero?.greeting}
@@ -498,43 +618,56 @@ export default function Home({
                     backgroundColor: hero.roleDotColor?.hex || "#ec4899",
                   }}
                 />
-                <span className="lowercase tracking-[0.25em] text-zinc-700 dark:text-zinc-200">
+                <span
+                  className="lowercase tracking-[0.25em] text-zinc-700 dark:text-zinc-200"
+                  style={{ color: hero.roleColor?.hex || undefined }}
+                >
                   {hero.currentRole}
                 </span>
               </div>
             )}
           </div>
 
-          <div className="text-4xl md:text-6xl lg:text-7xl leading-tight font-medium max-w-4xl space-y-2">
-            {hero?.line1 && (
-              <p
-                style={{ color: hero.line1Color?.hex || undefined }}
-                className="text-zinc-900 dark:text-zinc-100"
-              >
-                {hero.line1}
-              </p>
-            )}
-
-            {hero?.line2 && (
-              <p
-                style={{ color: hero.line2Color?.hex || undefined }}
-                className="text-zinc-900 dark:text-zinc-100"
-              >
-                {hero.line2}
-              </p>
-            )}
-
-            {hero?.rotatingLines && hero.rotatingLines.length > 0 && (
-              <RotatingText
-                text={hero.rotatingLines.map((item) => item.text || "")}
-                colors={hero.rotatingLines.map((item) =>
-                  item.color?.hex ? item.color.hex : undefined
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] items-start gap-10 lg:gap-4">
+            {/* LEFT TEXT */}
+            <div className="min-w-0 lg:max-w-[860px] xl:max-w-[920px]">
+              <div className="text-4xl md:text-6xl lg:text-[5.2rem] xl:text-[5.3rem] leading-[0.95] font-medium text-zinc-900 dark:text-zinc-100 space-y-2">
+                {hero?.line1 && (
+                  <p
+                    className="whitespace-normal lg:whitespace-nowrap"
+                    style={{ color: hero.line1Color?.hex || undefined }}
+                  >
+                    {hero.line1}
+                  </p>
                 )}
-                durationMs={2500}
-                slideOffset={40}
-                className="text-4xl md:text-6xl lg:text-7xl"
-              />
-            )}
+
+                {hero?.line2 && (
+                  <p
+                    className="whitespace-normal lg:whitespace-nowrap"
+                    style={{ color: hero.line2Color?.hex || undefined }}
+                  >
+                    {hero.line2}
+                  </p>
+                )}
+
+                {hero?.rotatingLines && hero.rotatingLines.length > 0 && (
+                  <RotatingText
+                    text={hero.rotatingLines.map((item) => item.text || "")}
+                    colors={hero.rotatingLines.map((item) => item.color?.hex)}
+                    durationMs={2500}
+                    slideOffset={40}
+                    className="text-4xl md:text-6xl lg:text-[5.2rem] xl:text-[5.5rem]"
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT STACK AREA */}
+            <div className="relative hidden lg:flex justify-end">
+              <div className="relative w-full flex justify-end translate-x-16 xl:translate-x-24 2xl:translate-x-28 -translate-y-4 xl:-translate-y-6">
+                <HeroImageStack images={hero?.heroImages || []} />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -569,7 +702,7 @@ export default function Home({
                 onClick={() => setIsAboutOpen(true)}
                 className="inline-flex items-center text-xs uppercase tracking-[0.25em] text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-200 mt-4"
               >
-                View full about ↗
+                about me ⤴
               </button>
             </div>
 
@@ -599,10 +732,7 @@ export default function Home({
                     backgroundRepeat: "repeat",
                     opacity: 0.08,
                   }}
-                  animate={{
-                    x: ["-1%", "1%", "-1%"],
-                    y: ["-1%", "1%", "-1%"],
-                  }}
+                  animate={{ x: ["-1%", "1%", "-1%"], y: ["-1%", "1%", "-1%"] }}
                   transition={{
                     duration: 20,
                     repeat: Infinity,
@@ -668,7 +798,7 @@ export default function Home({
                   {note.title}
                 </h3>
                 <p className="text-xs text-zinc-700 dark:text-zinc-400">
-                  {note.date || "—"} · {note.type || "note"}
+                  {note.date} · {note.type}
                 </p>
               </div>
             ))}
@@ -681,6 +811,7 @@ export default function Home({
           </div>
         </section>
 
+        {/* contacts */}
         <section
           id="contact"
           className="max-w-6xl mx-auto px-6 pb-16 border-t border-black/10 dark:border-white/10 pt-12 text-sm"
@@ -693,6 +824,7 @@ export default function Home({
             <h3 className="text-base md:text-lg font-medium text-zinc-900 dark:text-zinc-100">
               {contact?.headline || "Let’s work together"}
             </h3>
+
             <p className="text-zinc-800 dark:text-zinc-300">
               {contact?.body ||
                 "Feel free to reach out for collaborations, freelance work, or just to say hi."}
@@ -708,26 +840,24 @@ export default function Home({
                 </a>
               )}
 
-              {contact?.portfolioUrl && contact?.portfolioLink && (
-                <a
-                  href={contact.portfolioUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs uppercase tracking-[0.2em] text-cyan-700 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300"
-                >
-                  {contact.portfolioLink} ↗
-                </a>
+              {contact?.links?.map((link, index) =>
+                link?.label && link?.url ? (
+                  <a
+                    key={`${link.label}-${index}`}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs uppercase tracking-[0.2em] text-cyan-700 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300"
+                  >
+                    {link.label} ⤴
+                  </a>
+                ) : null
               )}
 
-              {contact?.secondaryUrl && contact?.secondaryLabel && (
-                <a
-                  href={contact.secondaryUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs uppercase tracking-[0.2em] text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
-                >
-                  {contact.secondaryLabel} ↗
-                </a>
+              {!contact?.email && !contact?.links?.length && (
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  Add contact data in Sanity Studio.
+                </p>
               )}
             </div>
           </div>
@@ -770,7 +900,7 @@ export default function Home({
                           .projects
                         </p>
                         <h2 className="text-[3rem] md:text-[6rem] leading-[0.9] tracking-[-0.08em] text-white/80 font-medium">
-                          projects
+                          ...
                         </h2>
                         <p className="mt-6 max-w-3xl text-[1.25rem] md:text-[2.3rem] leading-[1.08] tracking-[-0.04em] text-white/68">
                           Experiences that combine empathy, systems thinking,
@@ -1049,7 +1179,8 @@ export default function Home({
                           ...
                         </h2>
                         <p className="mt-6 max-w-4xl text-[1.25rem] md:text-[2.3rem] leading-[1.08] tracking-[-0.04em] text-white/68 whitespace-pre-line">
-                          {profile?.introLine ?? "Write your intro line in the Profile document in Sanity Studio."}
+                          {profile?.introLine ??
+                            "Write your intro line in the Profile document in the Sanity Studio."}
                         </p>
                       </div>
 
@@ -1101,11 +1232,8 @@ export default function Home({
                         </section>
 
                         {(profile?.education ||
-                          profile?.educationSubtext ||
                           profile?.location ||
-                          profile?.locationSubtext ||
-                          profile?.currentRole ||
-                          profile?.currentRoleSubtext) && (
+                          profile?.currentRole) && (
                             <section className="border-t border-white/10 pt-8">
                               <div className="grid md:grid-cols-3 gap-10 md:gap-8">
                                 <div className="space-y-2">
@@ -1240,7 +1368,7 @@ export default function Home({
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center mt-5 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-xs uppercase tracking-[0.2em] text-white/80 hover:bg-white hover:text-black transition-colors"
                                       >
-                                        {profile.featuredSection.linkLabel} ↗
+                                        {profile.featuredSection.linkLabel}
                                       </a>
                                     )}
                                 </div>
@@ -1270,11 +1398,9 @@ export default function Home({
                                       className="h-10 w-10 object-cover rounded-lg mb-3"
                                     />
                                   )}
-
                                   <h4 className="text-white/85">
                                     {item.title}
                                   </h4>
-
                                   {item.subtitle && (
                                     <p className="text-white/55 mt-1 text-sm leading-relaxed">
                                       {item.subtitle}
@@ -1299,9 +1425,16 @@ export default function Home({
                                   href={item.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-xs uppercase tracking-[0.2em] text-white/80 hover:bg-white hover:text-black transition-colors"
+                                  className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.2em] text-white/80 hover:bg-white hover:text-black transition-colors"
                                 >
-                                  {item.label || "Link"} ↗
+                                  {item.icon && (
+                                    <img
+                                      src={urlFor(item.icon).width(80).height(80).url()}
+                                      alt={item.label || "Social icon"}
+                                      className="h-5 w-5 object-cover rounded-sm"
+                                    />
+                                  )}
+                                  <span>{item.label || "Link"}</span>
                                 </a>
                               ))}
                             </div>
