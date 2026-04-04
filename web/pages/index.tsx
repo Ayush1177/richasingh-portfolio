@@ -764,7 +764,7 @@ export default function Home({
           id="playground"
           className="max-w-6xl mx-auto px-6 pb-24 border-t border-black/10 dark:border-white/10 pt-12"
         >
-          <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 dark:text-gray-400 mb-4">
+          <p className="text-xs tracking-[0.3em] text-zinc-500 dark:text-gray-400 mb-3">
             .playground
           </p>
 
@@ -803,7 +803,7 @@ export default function Home({
           id="latest"
           className="max-w-6xl mx-auto px-6 pb-20 border-t border-black/10 dark:border-white/10 pt-12"
         >
-          <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400 mb-3">
+          <p className="text-xs tracking-[0.3em] text-zinc-500 dark:text-gray-400 mb-3">
             .latest notes
           </p>
 
@@ -832,7 +832,7 @@ export default function Home({
           id="contact"
           className="max-w-6xl mx-auto px-6 pb-16 border-t border-black/10 dark:border-white/10 pt-12 text-sm"
         >
-          <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400 mb-3">
+          <p className="text-xs tracking-[0.3em] text-zinc-500 dark:text-gray-400 mb-3">
             .contact
           </p>
 
@@ -943,7 +943,7 @@ export default function Home({
                   <div className="rounded-[2rem] border border-white/10 bg-[rgba(6,6,8,0.88)] backdrop-blur-2xl overflow-hidden shadow-2xl">
                     <div className="flex items-start justify-between gap-6 border-b border-white/10 px-5 md:px-8 py-5 md:py-6">
                       <div className="max-w-3xl">
-                        <p className="text-[10px] md:text-xs uppercase tracking-[0.35em] text-white/40 mb-2">
+                        <p className="text-xs tracking-[0.3em] text-zinc-500 dark:text-gray-400 mb-3">
                           .projects
                         </p>
                         <h2 className="text-[3rem] md:text-[6rem] leading-[0.9] tracking-[-0.08em] text-white/80 font-medium">
@@ -1219,7 +1219,7 @@ export default function Home({
                   <div className="rounded-[2rem] border border-white/10 bg-[rgba(6,6,8,0.88)] backdrop-blur-2xl overflow-hidden shadow-2xl">
                     <div className="flex items-start justify-between gap-6 border-b border-white/10 px-5 md:px-8 py-5 md:py-6">
                       <div className="max-w-4xl">
-                        <p className="text-[10px] md:text-xs uppercase tracking-[0.35em] text-white/40 mb-2">
+                        <p className="text-xs tracking-[0.3em] text-zinc-500 dark:text-gray-400 mb-3">
                           .about
                         </p>
                         <h2 className="text-[3rem] md:text-[6rem] leading-[0.9] tracking-[-0.08em] text-white/80 font-medium">
