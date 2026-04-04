@@ -1426,7 +1426,7 @@ export default function Home({
                         {profile?.stackItems && profile.stackItems.length > 0 && (
                           <section className="border-t border-white/10 pt-8">
                             <p className="text-[10px] md:text-xs uppercase tracking-[0.35em] text-white/35 mb-4">
-                              .stack
+                              .tools
                             </p>
 
                             <div className="grid sm:grid-cols-2 gap-4">
