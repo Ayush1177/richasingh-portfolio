@@ -88,8 +88,16 @@ const contactQuery = groq`*[_type == "contact"][0]{
   email,
   links[]{
     label,
-    url
-  }
+    url,
+    icon
+  },
+  resumeLabel,
+  resume{
+    asset->{
+      url
+    }
+  },
+  resumeIcon
 }`;
 
 type RotatingLine = {
@@ -193,6 +201,7 @@ type Note = {
 type ContactLink = {
   label?: string;
   url?: string;
+  icon?: any;
 };
 
 type Contact = {
@@ -200,6 +209,13 @@ type Contact = {
   body?: string;
   email?: string;
   links?: ContactLink[];
+  resumeLabel?: string;
+  resume?: {
+    asset?: {
+      url?: string;
+    };
+  };
+  resumeIcon?: any;
 };
 
 type HomeProps = {
@@ -356,7 +372,7 @@ function HeroImageStack({
 
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % validImages.length);
-    }, 500);
+    }, 800);
 
     return () => clearInterval(interval);
   }, [validImages.length]);
@@ -368,7 +384,7 @@ function HeroImageStack({
   }
 
   return (
-    <div className="relative mx-auto h-[340px] w-[260px] sm:h-[400px] sm:w-[300px] md:h-[460px] md:w-[340px]">
+    <div className="relative mx-auto h-[280px] w-[220px] sm:h-[330px] sm:w-[250px] md:h-[380px] md:w-[290px]">
       {validImages.map((item, index) => {
         const isActive = index === activeIndex;
 
@@ -785,7 +801,7 @@ export default function Home({
 
         <section
           id="latest"
-          className="max-w-6xl mx-auto px-6 pb-32 border-t border-black/10 dark:border-white/10 pt-12"
+          className="max-w-6xl mx-auto px-6 pb-20 border-t border-black/10 dark:border-white/10 pt-12"
         >
           <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400 mb-3">
             .latest notes
@@ -820,41 +836,72 @@ export default function Home({
             .contact
           </p>
 
-          <div className="space-y-4 max-w-xl">
-            <h3 className="text-base md:text-lg font-medium text-zinc-900 dark:text-zinc-100">
-              {contact?.headline || "Let’s work together"}
-            </h3>
+          <div className="space-y-8 w-full">
+            <div className="max-w-xl">
+              <h3 className="text-base md:text-lg font-medium text-zinc-900 dark:text-zinc-100">
+                {contact?.headline || "Let’s work together"}
+              </h3>
 
-            <p className="text-zinc-800 dark:text-zinc-300">
-              {contact?.body ||
-                "Feel free to reach out for collaborations, freelance work, or just to say hi."}
-            </p>
+              <p className="text-zinc-800 dark:text-zinc-300">
+                {contact?.body ||
+                  "Feel free to reach out for collaborations, freelance work, or just to say hi."}
+              </p>
+            </div>
 
-            <div className="flex flex-wrap gap-4 items-center mt-2">
-              {contact?.email && (
-                <a
-                  href={`mailto:${contact.email}`}
-                  className="inline-flex items-center text-xs uppercase tracking-[0.25em] border border-black/20 dark:border-white/40 rounded-full px-4 py-2 text-zinc-900 dark:text-white hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
-                >
-                  {contact.email}
-                </a>
-              )}
-
-              {contact?.links?.map((link, index) =>
-                link?.label && link?.url ? (
+            <div className="mt-2 flex w-full flex-col gap-4 md:flex-row md:items-center">
+              <div className="flex flex-wrap items-center gap-3">
+                {contact?.email && (
                   <a
-                    key={`${link.label}-${index}`}
-                    href={link.url}
+                    href={`mailto:${contact.email}`}
+                    className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.2em] text-white/80 hover:bg-white hover:text-black transition-colors"
+                  >
+                    <span>{contact.email}</span>
+                  </a>
+                )}
+
+                {contact?.links?.map((item, index) =>
+                  item?.label && item?.url ? (
+                    <a
+                      key={`${item.label}-${index}`}
+                      href={item.url}
+                      target={item.url?.startsWith("mailto:") ? undefined : "_blank"}
+                      rel={item.url?.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+                      className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.2em] text-white/80 hover:bg-white hover:text-black transition-colors"
+                    >
+                      {item.icon && (
+                        <img
+                          src={urlFor(item.icon).width(80).height(80).url()}
+                          alt={item.label || "Contact icon"}
+                          className="h-5 w-5 object-cover rounded-sm"
+                        />
+                      )}
+                      <span>{item.label}</span>
+                    </a>
+                  ) : null
+                )}
+              </div>
+
+              {contact?.resume?.asset?.url && (
+                <div className="w-full md:ml-auto md:w-auto flex justify-end">
+                  <a
+                    href={contact.resume.asset.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs uppercase tracking-[0.2em] text-cyan-700 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300"
+                    className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.2em] text-white/80 hover:bg-white hover:text-black transition-colors"
                   >
-                    {link.label} ⤴
+                    {contact.resumeIcon && (
+                      <img
+                        src={urlFor(contact.resumeIcon).width(80).height(80).url()}
+                        alt={contact.resumeLabel || "Resume icon"}
+                        className="h-5 w-5 object-cover rounded-sm"
+                      />
+                    )}
+                    <span>{contact.resumeLabel || "Resume"}</span>
                   </a>
-                ) : null
+                </div>
               )}
 
-              {!contact?.email && !contact?.links?.length && (
+              {!contact?.email && !contact?.links?.length && !contact?.resume?.asset?.url && (
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   Add contact data in Sanity Studio.
                 </p>
@@ -1078,7 +1125,7 @@ export default function Home({
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center rounded-full border border-white/20 px-5 py-3 text-sm text-white hover:bg-white hover:text-black transition-colors mr-3"
                               >
-                                Live site ↗
+                                Live site ⤴
                               </a>
                             )}
 
@@ -1089,7 +1136,7 @@ export default function Home({
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center rounded-full border border-white/10 px-5 py-3 text-sm text-white/80 hover:text-white transition-colors"
                               >
-                                Case study ↗
+                                Case study ⤴
                               </a>
                             )}
                           </div>
@@ -1423,8 +1470,8 @@ export default function Home({
                                 <a
                                   key={`${item.label || "link"}-${index}`}
                                   href={item.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
+                                  target={item.url?.startsWith("mailto:") ? undefined : "_blank"}
+                                  rel={item.url?.startsWith("mailto:") ? undefined : "noopener noreferrer"}
                                   className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.2em] text-white/80 hover:bg-white hover:text-black transition-colors"
                                 >
                                   {item.icon && (

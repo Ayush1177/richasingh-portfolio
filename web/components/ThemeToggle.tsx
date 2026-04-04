@@ -42,9 +42,9 @@ export default function ThemeToggle() {
       className="inline-flex items-center justify-center rounded-full border border-black/15 dark:border-white/30 bg-[#ebe7df]/80 dark:bg-black/40 text-zinc-800 dark:text-white p-2 hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
     >
       {theme === "dark" ? (
-        <SunIcon className="h-4 w-4 text-yellow-300" />
-      ) : (
         <MoonIcon className="h-4 w-4 text-zinc-700" />
+      ) : (
+        <SunIcon className="h-4 w-4 text-yellow-300" />
       )}
     </button>
   );
