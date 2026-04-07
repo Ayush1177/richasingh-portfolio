@@ -1,8 +1,9 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #3e3d3cff;
+  --foreground: #ffffff;
 }
 
 @theme inline {
@@ -12,7 +13,6 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Let the toggle fully control the theme */
 body {
   background: var(--background);
   color: var(--foreground);
@@ -22,9 +22,15 @@ body {
 .page-grid-bg {
   background-color: var(--background);
   background-image: linear-gradient(to right,
-      rgba(148, 163, 184, 0.15) 1px,
+      rgba(183, 191, 201, 0.15) 1px,
       transparent 1px);
   background-size: 80px 100%;
+}
+
+html.dark .page-grid-bg {
+  background-image: linear-gradient(to right,
+      rgba(183, 191, 201, 0.10) 1px,
+      transparent 1px);
 }
 
 .text-foreground {
@@ -58,8 +64,19 @@ body {
   }
 }
 
-html,
-body {
-  background: var(--background);
-  color: var(--foreground);
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.link-arrow {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1;
+  display: inline-block;
+  transform: translateY(-1px);
 }

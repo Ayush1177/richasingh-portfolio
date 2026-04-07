@@ -7,7 +7,7 @@ type Theme = "light" | "dark";
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     setMounted(true);
@@ -20,10 +20,10 @@ export default function ThemeToggle() {
       return;
     }
 
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initial: Theme = prefersDark ? "dark" : "light";
+    const initial: Theme = "light";
     setTheme(initial);
     applyTheme(initial);
+    window.localStorage.setItem("theme", initial);
   }, []);
 
   if (!mounted) return null;
@@ -39,12 +39,12 @@ export default function ThemeToggle() {
     <button
       aria-label="Toggle dark mode"
       onClick={toggleTheme}
-      className="inline-flex items-center justify-center rounded-full border border-black/15 dark:border-white/30 bg-[#ebe7df]/80 dark:bg-black/40 text-zinc-800 dark:text-white p-2 hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+      className="inline-flex items-center justify-center rounded-full border border-[#cfc6b8] dark:border-[#8f877b] dark:bg-[#181615]/85 text-zinc-800 dark:text-[#f3efe8] p-2 hover:bg-[#d9cfbf] hover:text-zinc-900 dark:hover:bg-[#24211f] dark:hover:text-white transition-colors"
     >
       {theme === "dark" ? (
-        <MoonIcon className="h-4 w-4 text-zinc-700" />
+        <MoonIcon className="h-4 w-4 text-zinc-700 dark:text-white" />
       ) : (
-        <SunIcon className="h-4 w-4 text-yellow-300" />
+        <SunIcon className="h-4 w-4 text-[#b7791f]" />
       )}
     </button>
   );
@@ -56,12 +56,12 @@ function applyTheme(theme: Theme) {
   if (theme === "dark") {
     root.classList.add("dark");
     root.style.colorScheme = "dark";
-    root.style.setProperty("--background", "#050509");
-    root.style.setProperty("--foreground", "#3e3d3cff");
+    root.style.setProperty("--background", "#000000");
+    root.style.setProperty("--foreground", "#f5f5f5");
   } else {
     root.classList.remove("dark");
     root.style.colorScheme = "light";
-    root.style.setProperty("--background", "#3e3d3cff");
-    root.style.setProperty("--foreground", "#020617");
+    root.style.setProperty("--background", "#3e3d3c");
+    root.style.setProperty("--foreground", "#f5f5f5");
   }
 }

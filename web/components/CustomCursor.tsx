@@ -103,9 +103,9 @@ export default function CustomCursor() {
                 ringSize: 32,
                 dotSize: 8,
                 trailSize: 54,
-                ringOpacity: isDark ? 0.9 : 0.82,
-                dotOpacity: 1,
-                trailOpacity: isDark ? 0.18 : 0.14,
+                ringOpacity: isDark ? 0.9 : 0.78,
+                dotOpacity: isDark ? 1 : 0.96,
+                trailOpacity: isDark ? 0.18 : 0.11,
                 ringScale: 1,
                 showLabel: false,
                 label: "",
@@ -114,9 +114,9 @@ export default function CustomCursor() {
                 ringSize: 56,
                 dotSize: 10,
                 trailSize: 78,
-                ringOpacity: isDark ? 1 : 0.92,
+                ringOpacity: isDark ? 1 : 0.86,
                 dotOpacity: 1,
-                trailOpacity: isDark ? 0.24 : 0.18,
+                trailOpacity: isDark ? 0.24 : 0.14,
                 ringScale: 1.06,
                 showLabel: false,
                 label: "",
@@ -125,9 +125,9 @@ export default function CustomCursor() {
                 ringSize: 82,
                 dotSize: 10,
                 trailSize: 120,
-                ringOpacity: isDark ? 0.98 : 0.94,
+                ringOpacity: isDark ? 0.98 : 0.9,
                 dotOpacity: 1,
-                trailOpacity: isDark ? 0.28 : 0.22,
+                trailOpacity: isDark ? 0.28 : 0.18,
                 ringScale: 1.1,
                 showLabel: true,
                 label: "View",
@@ -136,9 +136,9 @@ export default function CustomCursor() {
                 ringSize: 22,
                 dotSize: 6,
                 trailSize: 38,
-                ringOpacity: isDark ? 0.6 : 0.5,
-                dotOpacity: 0.95,
-                trailOpacity: isDark ? 0.12 : 0.08,
+                ringOpacity: isDark ? 0.6 : 0.42,
+                dotOpacity: isDark ? 0.95 : 0.88,
+                trailOpacity: isDark ? 0.12 : 0.06,
                 ringScale: 0.92,
                 showLabel: false,
                 label: "",
@@ -171,9 +171,9 @@ export default function CustomCursor() {
         }
         : {
             background:
-                "radial-gradient(circle, rgba(255,214,226,0.24) 0%, rgba(255,196,214,0.16) 36%, rgba(255,196,214,0.06) 62%, transparent 100%)",
+                "radial-gradient(circle, rgba(196,144,160,0.20) 0%, rgba(181,126,145,0.12) 36%, rgba(181,126,145,0.05) 62%, transparent 100%)",
             boxShadow:
-                "0 0 28px rgba(255,196,214,0.16), 0 0 64px rgba(255,214,226,0.12)",
+                "0 0 24px rgba(181,126,145,0.14), 0 0 56px rgba(196,144,160,0.10)",
         };
 
     const ringStyle = isDark
@@ -185,11 +185,11 @@ export default function CustomCursor() {
                 "0 0 18px rgba(255,255,255,0.26), 0 0 42px rgba(255,255,255,0.16), inset 0 0 12px rgba(255,255,255,0.08)",
         }
         : {
-            border: "1px solid rgba(255,214,226,0.95)",
+            border: "1px solid rgba(181,126,145,0.72)",
             background:
-                "radial-gradient(circle, rgba(255,210,225,0.22) 0%, rgba(255,182,193,0.10) 42%, rgba(255,182,193,0.03) 70%, transparent 100%)",
+                "radial-gradient(circle, rgba(214,186,196,0.16) 0%, rgba(196,144,160,0.09) 42%, rgba(181,126,145,0.03) 70%, transparent 100%)",
             boxShadow:
-                "0 0 18px rgba(255,210,225,0.24), 0 0 42px rgba(255,182,193,0.18), inset 0 0 12px rgba(255,255,255,0.08)",
+                "0 0 14px rgba(181,126,145,0.14), 0 0 34px rgba(181,126,145,0.10), inset 0 0 10px rgba(255,255,255,0.08)",
         };
 
     const dotStyle = isDark
@@ -198,8 +198,8 @@ export default function CustomCursor() {
             boxShadow: "0 0 14px rgba(255,255,255,0.95)",
         }
         : {
-            background: "#ffd6e2",
-            boxShadow: "0 0 14px rgba(255,214,226,0.98)",
+            background: "#b57e91",
+            boxShadow: "0 0 10px rgba(181,126,145,0.34)",
         };
 
     const labelStyle = isDark
@@ -210,10 +210,10 @@ export default function CustomCursor() {
             boxShadow: "0 8px 30px rgba(0,0,0,0.28)",
         }
         : {
-            background: "rgba(255,245,248,0.88)",
-            color: "rgba(110,74,88,0.96)",
-            border: "1px solid rgba(255,214,226,0.9)",
-            boxShadow: "0 8px 24px rgba(255,196,214,0.18)",
+            background: "rgba(248,241,243,0.92)",
+            color: "rgba(101,72,82,0.96)",
+            border: "1px solid rgba(196,144,160,0.36)",
+            boxShadow: "0 8px 20px rgba(181,126,145,0.10)",
         };
 
     return (
@@ -314,10 +314,7 @@ export default function CustomCursor() {
                     damping: 32,
                 }}
             >
-                <div
-                    className="h-full w-full rounded-full"
-                    style={dotStyle}
-                />
+                <div className="h-full w-full rounded-full" style={dotStyle} />
             </motion.div>
         </>
     );
