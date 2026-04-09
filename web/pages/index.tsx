@@ -493,39 +493,41 @@ export default function Home({
   contact,
 }: HomeProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isProjectsOpen, setIsProjectsOpen] = useState(false);
-  const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const [isContactOpen, setIsContactOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [isProjectsOpen, setIsProjectsOpen] = useState(false)
+  const [isAboutOpen, setIsAboutOpen] = useState(false)
+  const [isContactOpen, setIsContactOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [hoveredContactItem, setHoveredContactItem] = useState<string | null>(null)
 
-  const closeProjects = () => {
-    setSelectedProject(null);
-    setIsProjectsOpen(false);
-  };
+  const [isLatestOpen, setIsLatestOpen] = useState(false)
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null)
+  const [hoveredNote, setHoveredNote] = useState<Note | null>(null)
+  const [activeNoteIndex, setActiveNoteIndex] = useState(0)
+  const [isLatestPreviewHovered, setIsLatestPreviewHovered] = useState(false)
 
-  const closeProjectDetails = () => {
-    setSelectedProject(null);
-  };
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
-  const closeAbout = () => {
-    setIsAboutOpen(false);
-  };
+  const [showPageScrollTop, setShowPageScrollTop] = useState(false)
+  const [showProjectsScrollTop, setShowProjectsScrollTop] = useState(false)
+  const [showAboutScrollTop, setShowAboutScrollTop] = useState(false)
+  const [showLatestScrollTop, setShowLatestScrollTop] = useState(false)
+  const [showProjectDetailScrollTop, setShowProjectDetailScrollTop] = useState(false)
+  const [showContactScrollTop, setShowContactScrollTop] = useState(false)
 
-  const closeContact = () => {
-    setIsContactOpen(false);
-  };
+  const projectsOverlayRef = useRef<HTMLDivElement | null>(null)
+  const aboutOverlayRef = useRef<HTMLDivElement | null>(null)
+  const latestOverlayRef = useRef<HTMLDivElement | null>(null)
+  const projectDetailOverlayRef = useRef<HTMLDivElement | null>(null)
+  const latestScrollRef = useRef<HTMLDivElement | null>(null)
+  const contactOverlayRef = useRef<HTMLDivElement | null>(null)
 
-  const [isLatestOpen, setIsLatestOpen] = useState(false);
-  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
-  const [hoveredNote, setHoveredNote] = useState<Note | null>(null);
-  const latestScrollRef = useRef<HTMLDivElement | null>(null);
+  const latestNote = notes?.[0] ?? null
 
-  const previewNote = hoveredNote ?? notes?.[0] ?? null;
+  const previewNote = hoveredNote ?? (notes?.length ? notes[activeNoteIndex] : null)
 
   const relatedNotes = notes
     .filter((note) => note._id !== selectedNote?._id)
-    .slice(0, 3);
+    .slice(0, 3)
 
   const formatNoteDate = (value?: string) =>
     value
@@ -534,66 +536,208 @@ export default function Home({
         day: "numeric",
         year: "numeric",
       })
-      : "No date";
+      : "No date"
+
+  const closeProjects = () => {
+    setSelectedProject(null)
+    setIsProjectsOpen(false)
+  }
+
+  const closeProjectDetails = () => {
+    setSelectedProject(null)
+  }
+
+  const closeAbout = () => {
+    setIsAboutOpen(false)
+  }
+
+  const closeContact = () => {
+    setIsContactOpen(false)
+  }
 
   const openLatest = () => {
-    setSelectedNote(notes?.[0] ?? null);
-    setIsLatestOpen(true);
-  };
+    if (!latestNote) return
+    setSelectedNote(latestNote)
+    setIsLatestOpen(true)
+  }
 
   const closeLatest = () => {
-    setSelectedNote(null);
-    setIsLatestOpen(false);
-  };
-
-  const [isDarkMode, setIsDarkMode] = useState(false);
+    setSelectedNote(null)
+    setIsLatestOpen(false)
+  }
 
   useEffect(() => {
-    const root = document.documentElement;
+    const handleWindowScroll = () => {
+      setShowPageScrollTop(window.scrollY > 500)
+    }
+
+    handleWindowScroll()
+    window.addEventListener("scroll", handleWindowScroll)
+
+    return () => window.removeEventListener("scroll", handleWindowScroll)
+  }, [])
+
+  useEffect(() => {
+    const node = projectsOverlayRef.current
+
+    if (!isProjectsOpen || !node || selectedProject) {
+      setShowProjectsScrollTop(false)
+      return
+    }
+
+    const handleProjectsScroll = () => {
+      setShowProjectsScrollTop(node.scrollTop > 120)
+    }
+
+    handleProjectsScroll()
+    node.addEventListener("scroll", handleProjectsScroll)
+
+    return () => node.removeEventListener("scroll", handleProjectsScroll)
+  }, [isProjectsOpen, selectedProject])
+
+  useEffect(() => {
+    const node = aboutOverlayRef.current
+
+    if (!isAboutOpen || !node) {
+      setShowAboutScrollTop(false)
+      return
+    }
+
+    const handleAboutScroll = () => {
+      setShowAboutScrollTop(node.scrollTop > 120)
+    }
+
+    handleAboutScroll()
+    node.addEventListener("scroll", handleAboutScroll)
+
+    return () => node.removeEventListener("scroll", handleAboutScroll)
+  }, [isAboutOpen])
+
+  useEffect(() => {
+    const node = latestOverlayRef.current
+
+    if (!isLatestOpen || !node) {
+      setShowLatestScrollTop(false)
+      return
+    }
+
+    const handleLatestScroll = () => {
+      setShowLatestScrollTop(node.scrollTop > 120)
+    }
+
+    handleLatestScroll()
+    node.addEventListener("scroll", handleLatestScroll)
+
+    return () => node.removeEventListener("scroll", handleLatestScroll)
+  }, [isLatestOpen])
+
+  useEffect(() => {
+    const node = projectDetailOverlayRef.current
+
+    if (!selectedProject || !node) {
+      setShowProjectDetailScrollTop(false)
+      return
+    }
+
+    const handleProjectDetailScroll = () => {
+      setShowProjectDetailScrollTop(node.scrollTop > 120)
+    }
+
+    handleProjectDetailScroll()
+    node.addEventListener("scroll", handleProjectDetailScroll)
+
+    return () => node.removeEventListener("scroll", handleProjectDetailScroll)
+  }, [selectedProject])
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    })
+  }
+
+  const scrollOverlayToTop = (ref: React.RefObject<HTMLDivElement | null>) => {
+    ref.current?.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    })
+  }
+
+  useEffect(() => {
+    const node = contactOverlayRef.current
+
+    if (!isContactOpen || !node) {
+      setShowContactScrollTop(false)
+      return
+    }
+
+    const handleContactScroll = () => {
+      setShowContactScrollTop(node.scrollTop > 120)
+    }
+
+    handleContactScroll()
+    node.addEventListener("scroll", handleContactScroll)
+
+    return () => node.removeEventListener("scroll", handleContactScroll)
+  }, [isContactOpen])
+
+  useEffect(() => {
+    const root = document.documentElement
 
     const updateTheme = () => {
-      setIsDarkMode(root.classList.contains("dark"));
-    };
+      setIsDarkMode(root.classList.contains("dark"))
+    }
 
-    updateTheme();
+    updateTheme()
 
-    const observer = new MutationObserver(updateTheme);
-    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    const observer = new MutationObserver(updateTheme)
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] })
 
-    return () => observer.disconnect();
-  }, []);
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!notes?.length || notes.length <= 1) return
+    if (hoveredNote || isLatestPreviewHovered) return
+
+    const interval = setInterval(() => {
+      setActiveNoteIndex((prev) => (prev + 1) % notes.length)
+    }, 2600)
+
+    return () => clearInterval(interval)
+  }, [notes, hoveredNote, isLatestPreviewHovered])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         if (selectedProject) {
-          setSelectedProject(null);
-          return;
+          setSelectedProject(null)
+          return
         }
 
         if (isLatestOpen) {
-          closeLatest();
-          return;
+          closeLatest()
+          return
         }
 
         if (isContactOpen) {
-          closeContact();
-          return;
+          closeContact()
+          return
         }
 
         if (isAboutOpen) {
-          closeAbout();
-          return;
+          closeAbout()
+          return
         }
 
         if (isProjectsOpen) {
-          closeProjects();
-          return;
+          closeProjects()
+          return
         }
       }
-    };
+    }
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown)
 
     if (
       isProjectsOpen ||
@@ -602,15 +746,15 @@ export default function Home({
       isLatestOpen ||
       selectedProject
     ) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = "hidden"
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = ""
     }
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
-    };
+      document.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = ""
+    }
   }, [
     isProjectsOpen,
     isAboutOpen,
@@ -618,37 +762,22 @@ export default function Home({
     isLatestOpen,
     selectedProject,
     notes,
-  ]);
+  ])
 
-  const overlayBackdropClass =
-    "absolute inset-0 bg-black/25 dark:bg-black/68";
-
-  const overlayGridClass =
-    "pointer-events-none absolute inset-0 opacity-[0.18] bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:120px_120px]";
-
-  const overlayPanelClass =
-    "rounded-[1.5rem] sm:rounded-[2rem] border border-white/10 bg-[#5a5754] dark:bg-[#050509] overflow-hidden shadow-2xl";
-
-  const overlayHeaderClass =
-    "flex items-start justify-between gap-4 sm:gap-6 border-b border-white/10 px-4 sm:px-5 md:px-8 py-4 sm:py-5 md:py-6";
-
-  const overlayLabelClass =
-    "text-[11px] sm:text-xs tracking-[0.3em] text-white/45 mb-3";
+  const overlayBackdropClass = "absolute inset-0 bg-black/25 dark:bg-black/68";
+  const overlayGridClass = "pointer-events-none absolute inset-0 opacity-[0.18] bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:120px_120px]";
+  const overlayPanelClass = "rounded-[1.5rem] sm:rounded-[2rem] border border-white/10 bg-[#5a5754] dark:bg-[#050509] overflow-hidden shadow-2xl";
+  const overlayHeaderClass = "flex items-start justify-between gap-4 sm:gap-6 border-b border-white/10 px-4 sm:px-5 md:px-8 py-4 sm:py-5 md:py-6";
+  const overlayLabelClass = "text-[11px] sm:text-xs tracking-[0.3em] text-white/45 mb-3";
 
   const overlayTitleClass = "text-white/85";
   const overlayBodyClass = "text-white/72";
   const overlayMutedClass = "text-white/55";
   const overlayStrongClass = "text-white/88";
 
-  const overlayCardClass =
-    "rounded-[1.2rem] sm:rounded-[1.5rem] border border-white/10 bg-white/10";
-
-  const overlayButtonClass =
-    "inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white hover:text-black transition-colors";
-
-  const overlayIconButtonClass =
-    "relative z-10 inline-flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 md:h-12 md:w-12 rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white hover:text-black transition-colors shrink-0";
-
+  const overlayCardClass = "rounded-[1.2rem] sm:rounded-[1.5rem] border border-white/10 bg-white/10";
+  const overlayButtonClass = "inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white hover:text-black transition-colors";
+  const overlayIconButtonClass = "relative z-10 inline-flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 md:h-12 md:w-12 rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white hover:text-black transition-colors shrink-0";
   const overlayDividerClass = "border-white/10";
 
   return (
@@ -658,7 +787,9 @@ export default function Home({
       <main className="min-h-screen relative overflow-hidden page-grid-bg text-zinc-900 dark:text-white">
 
         {/* Container Sections */}
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-8 sm:pb-10">
+        <section
+          id="container-sections"
+          className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-8 sm:pb-10">
           {/* MOBILE / TABLET NAV */}
           <div className="md:hidden">
             <motion.div
@@ -698,7 +829,7 @@ export default function Home({
                     onClick={() => setIsMobileMenuOpen((prev) => !prev)}
                     aria-expanded={isMobileMenuOpen}
                     aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-                    className="group inline-flex items-center gap-3 rounded-full border border-white/25 dark:border-white/25 px-3 py-2 text-zinc-900 dark:text-zinc-100 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    className="group inline-flex items-center gap-3 rounded-full border border-white/25 dark:border-white/25 px-3 py-2 text-zinc-900 dark:text-zinc-100 transition-colors hover:bg-white/10 dark:hover:bg-white/10"
                   >
                     <span className="text-[11px] uppercase tracking-[0.2em] font-bold dark:font-normal">
                       {isMobileMenuOpen ? "Close" : "Menu"}
@@ -746,7 +877,7 @@ export default function Home({
                             setIsProjectsOpen(true)
                             setIsMobileMenuOpen(false)
                           }}
-                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-white/10 dark:hover:bg-white/10 transition-colors"
                         >
                           Projects
                         </button>
@@ -757,7 +888,7 @@ export default function Home({
                             setIsAboutOpen(true)
                             setIsMobileMenuOpen(false)
                           }}
-                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-white/10 dark:hover:bg-white/10 transition-colors"
                         >
                           About
                         </button>
@@ -765,7 +896,7 @@ export default function Home({
                         <a
                           href="#playground"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="block w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          className="block w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-white/10 dark:hover:bg-white/10 transition-colors"
                         >
                           Playground
                         </a>
@@ -776,7 +907,7 @@ export default function Home({
                             openLatest()
                             setIsMobileMenuOpen(false)
                           }}
-                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-white/10 dark:hover:bg-white/10 transition-colors"
                         >
                           Latest
                         </button>
@@ -787,7 +918,7 @@ export default function Home({
                             setIsContactOpen(true)
                             setIsMobileMenuOpen(false)
                           }}
-                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-white/10 dark:hover:bg-white/10 transition-colors"
                         >
                           Contact
                         </button>
@@ -869,14 +1000,18 @@ export default function Home({
         </section>
 
         {/* Background effects */}
-        <div className="pointer-events-none fixed inset-0 -z-10">
+        <div
+          id="background-effects"
+          className="pointer-events-none fixed inset-0 -z-10">
           <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-purple-500/10 dark:bg-purple-500/30 blur-3xl" />
           <div className="absolute top-40 -right-32 h-96 w-96 rounded-full bg-cyan-400/10 dark:bg-cyan-400/25 blur-3xl" />
           <div className="absolute bottom-0 left-1/2 h-72 w-[32rem] sm:w-[40rem] -translate-x-1/2 translate-y-1/3 rounded-[999px] bg-gradient-to-r from-purple-500/8 via-fuchsia-500/10 to-cyan-400/8 dark:from-purple-500/20 dark:via-fuchsia-500/25 dark:to-cyan-400/20 blur-3xl" />
         </div>
 
         {/* Hero section */}
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-0 pb-8 sm:pb-10 border-t border-white/20 dark:border-white/10">
+        <section
+          id="hero"
+          className="max-w-6xl mx-auto px-4 sm:px-6 pt-0 pb-8 sm:pb-10 border-t border-white/20 dark:border-white/10">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 mb-10 sm:mb-12 lg:mb-16">
             <p className="text-sm sm:text-base md:text-lg font-semibold dark:font-normal text-zinc-900 dark:text-zinc-100">
               {hero?.greeting}
@@ -1065,60 +1200,96 @@ export default function Home({
           </p>
 
           <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-10 items-start">
-            <div className="space-y-6">
-              <p className="inline-block text-2xl md:text-3xl font-large tracking-[-0.5px] font-bold dark:font-bold leading-snug text-zinc-900 dark:text-zinc-100">
-                {previewNote?.previewText ||
-                  "A short editorial preview for the latest note goes here."}
-              </p>
+            <div
+              className="space-y-6"
+              onMouseEnter={() => setIsLatestPreviewHovered(true)}
+              onMouseLeave={() => setIsLatestPreviewHovered(false)}
+            >
+              <div className="relative min-h-[260px] sm:min-h-[320px] md:min-h-[470px]">
+                <AnimatePresence mode="sync" initial={false}>
+                  <motion.div
+                    key={previewNote?._id ?? "latest-preview-fallback"}
+                    initial={{ opacity: 0, scale: 0.985, filter: "blur(10px)" }}
+                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, scale: 1.015, filter: "blur(10px)" }}
+                    transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute inset-0 space-y-6 sm:space-y-8 will-change-transform"
+                  >
+                    <p className="inline-block text-2xl md:text-3xl font-large tracking-[-0.5px] font-bold dark:font-bold leading-snug text-zinc-900 dark:text-zinc-100">
+                      {previewNote?.previewText ||
+                        "A short editorial preview for the latest note goes here."}
+                    </p>
 
-              {previewNote?.coverImage && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedNote(previewNote);
-                    setIsLatestOpen(true);
-                  }}
-                  className="group block w-full text-left"
-                >
-                  <div className="overflow-hidden rounded-[1.35rem] sm:rounded-[1.6rem] border border-white/20 dark:border-white/10 bg-black/5 dark:bg-white/5">
-                    <img
-                      src={urlFor(previewNote.coverImage).width(1200).height(800).url()}
-                      alt={previewNote?.title || "Latest note cover image"}
-                      className="w-full h-[100px] sm:h-[150px] md:h-[320px] object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
-                    />
-                  </div>
+                    {previewNote?.coverImage && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedNote(previewNote);
+                          setIsLatestOpen(true);
+                        }}
+                        className="group block w-full text-left"
+                      >
+                        <div className="overflow-hidden rounded-[1.35rem] sm:rounded-[1.6rem] border border-white/20 dark:border-white/10 bg-black/5 dark:bg-white/5">
+                          <img
+                            src={urlFor(previewNote.coverImage).width(1200).height(800).url()}
+                            alt={previewNote?.title || "Latest note cover image"}
+                            className="w-full h-[100px] sm:h-[150px] md:h-[320px] object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                          />
+                        </div>
+                      </button>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
 
-                  <span className="mt-10 inline-flex items-center text-xs uppercase tracking-[0.25em] font-semibold dark:font-normal text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-200">
-                    latest note ⤴
-                  </span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={openLatest}
+                className="mt-4 sm:mt-5 inline-flex items-center text-xs uppercase tracking-[0.25em] font-semibold dark:font-normal text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-200"
+              >
+                latest note ⤴
+              </button>
             </div>
 
             <div
               className="space-y-6 text-sm"
               onMouseLeave={() => setHoveredNote(null)}
             >
-              {notes.map((note) => (
-                <button
-                  key={note._id}
-                  type="button"
-                  onMouseEnter={() => setHoveredNote(note)}
-                  onFocus={() => setHoveredNote(note)}
-                  onClick={() => {
-                    setSelectedNote(note);
-                    setIsLatestOpen(true);
-                  }}
-                  className="block w-full text-left"
-                >
-                  <h3 className="inline-block text-2xl md:text-2xl font-medium tracking-[-0.5px] mb-1 font-semibold dark:font-normal text-zinc-900 dark:text-zinc-100">
-                    {note.title}
-                  </h3>
-                  <p className="text-xs font-bold dark:font-normal text-zinc-900 dark:text-zinc-100">
-                    {note.date} {note.type ? `· ${note.type}` : ""}
-                  </p>
-                </button>
-              ))}
+              {notes.map((note) => {
+                const isActive = previewNote?._id === note._id;
+
+                return (
+                  <button
+                    key={note._id}
+                    type="button"
+                    onMouseEnter={() => setHoveredNote(note)}
+                    onFocus={() => setHoveredNote(note)}
+                    onBlur={() => setHoveredNote(null)}
+                    onClick={() => {
+                      setSelectedNote(note);
+                      setIsLatestOpen(true);
+                    }}
+                    className="block w-full text-left"
+                  >
+                    <h3
+                      className={`inline-block text-2xl md:text-2xl font-medium tracking-[-0.5px] mb-1 font-semibold dark:font-normal transition-colors ${isActive
+                        ? "text-zinc-900 dark:text-zinc-100"
+                        : "text-zinc-800 dark:text-zinc-500"
+                        }`}
+                    >
+                      {note.title}
+                    </h3>
+                    <p
+                      className={`text-xs font-bold dark:font-normal transition-colors ${isActive
+                        ? "text-zinc-900 dark:text-zinc-100"
+                        : "text-zinc-800 dark:text-zinc-500"
+                        }`}
+                    >
+                      {note.date} {note.type ? `· ${note.type}` : ""}
+                    </p>
+                  </button>
+                );
+              })}
 
               {notes.length === 0 && (
                 <p className="text-sm text-zinc-700 dark:text-zinc-400">
@@ -1168,7 +1339,7 @@ export default function Home({
                       href={item.url}
                       target={item.url?.startsWith("mailto:") ? undefined : "_blank"}
                       rel={item.url?.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-                      className="inline-flex items-center gap-3 rounded-full border border-white/20 dark:border-white/15 bg-black/5 dark:bg-white/5 px-4 py-3 text-[11px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.2em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:bg-black/10 dark:hover:bg-white hover:text-black dark:hover:text-black transition-colors"
+                      className="inline-flex items-center gap-3 rounded-full border border-white/20 dark:border-white/15 bg-black/5 dark:bg-white/5 px-4 py-3 text-[11px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.2em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:bg-white/20 dark:hover:bg-white hover:text-black dark:hover:text-black transition-colors"
                     >
                       {item.icon && (
                         <img
@@ -1189,7 +1360,7 @@ export default function Home({
                     href={contact.resume.asset.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-3 rounded-full border border-white/20 dark:border-white/15 bg-black/5 dark:bg-white/5 px-4 py-3 text-[11px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.2em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:bg-black/10 dark:hover:bg-white hover:text-black dark:hover:text-black transition-colors whitespace-nowrap"
+                    className="inline-flex items-center gap-3 rounded-full border border-white/20 dark:border-white/15 bg-black/5 dark:bg-white/5 px-4 py-3 text-[11px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.2em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:bg-white/20 dark:hover:bg-white hover:text-black dark:hover:text-black transition-colors whitespace-nowrap"
                   >
                     {contact.resumeIcon && (
                       <img
@@ -1211,7 +1382,32 @@ export default function Home({
             </div>
           </div>
         </section>
+
       </main>
+
+      {/* Scroll to top button */}
+      <AnimatePresence>
+        {showPageScrollTop &&
+          !isProjectsOpen &&
+          !isAboutOpen &&
+          !isLatestOpen &&
+          !selectedProject && (
+            <motion.button
+              type="button"
+              onClick={scrollToTop}
+              initial={{ opacity: 0, y: 16, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.96 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.96 }}
+              className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-[80] inline-flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-black/10 dark:border-white/15 bg-white/85 dark:bg-black/75 backdrop-blur-md text-zinc-900 dark:text-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.35)] hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+              aria-label="Go to top"
+            >
+              <span className="text-base sm:text-lg">↑</span>
+            </motion.button>
+          )}
+      </AnimatePresence>
 
       {/* Project overlay and nested project */}
       <AnimatePresence>
@@ -1233,6 +1429,7 @@ export default function Home({
 
             {/* Projects sheet */}
             <motion.div
+              ref={projectsOverlayRef}
               className="absolute inset-0 overflow-y-auto"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1245,10 +1442,30 @@ export default function Home({
                   <div className="absolute inset-0 hidden dark:block bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:120px_120px] opacity-[0.18]" />
                 </div>
 
+                {/* Floating top arrow in blur rail */}
+                <AnimatePresence>
+                  {!selectedProject && showProjectsScrollTop && (
+                    <motion.button
+                      type="button"
+                      onClick={() => scrollOverlayToTop(projectsOverlayRef)}
+                      initial={{ opacity: 0, y: 12, scale: 0.94 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.96 }}
+                      className="fixed right-6 bottom-8 z-[105] inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 dark:border-white/12 bg-white/70 dark:bg-white/6 text-zinc-800 dark:text-white/80 backdrop-blur-md hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+                      aria-label="Scroll projects overlay to top"
+                    >
+                      <span className="text-base leading-none">↑</span>
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+
                 <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
                   <div
                     className={`rounded-[1.5rem] sm:rounded-[2rem] border border-black/10 dark:border-white/10 bg-white/80 dark:bg-[rgba(6,6,8,0.88)] text-zinc-900 dark:text-white/95 backdrop-blur-2xl overflow-hidden shadow-2xl transition-all duration-300 
-                      ${selectedProject
+                ${selectedProject
                         ? "blur-[10px] scale-[0.985] opacity-60 pointer-events-none"
                         : "blur-0 scale-100 opacity-100"
                       }`}
@@ -1314,12 +1531,33 @@ export default function Home({
                   </div>
 
                   <motion.div
+                    ref={projectDetailOverlayRef}
                     className="relative h-full overflow-y-auto"
                     initial={{ y: 36, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 20, opacity: 0 }}
                     transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
                   >
+                    {/* Floating top arrow for nested detail overlay */}
+                    <AnimatePresence>
+                      {showProjectDetailScrollTop && (
+                        <motion.button
+                          type="button"
+                          onClick={() => scrollOverlayToTop(projectDetailOverlayRef)}
+                          initial={{ opacity: 0, y: 12, scale: 0.94 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                          whileHover={{ y: -2 }}
+                          whileTap={{ scale: 0.96 }}
+                          className="fixed right-6 bottom-8 z-[120] inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 dark:border-white/12 bg-white/70 dark:bg-white/6 text-zinc-800 dark:text-white/80 backdrop-blur-md hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+                          aria-label="Scroll project detail overlay to top"
+                        >
+                          <span className="text-base leading-none">↑</span>
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
+
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-20 sm:pb-24">
                       <div className="rounded-[1.5rem] sm:rounded-[2rem] border border-black/10 dark:border-white/10 bg-white/80 dark:bg-[rgba(6,6,8,0.88)] text-zinc-900 dark:text-white backdrop-blur-2xl overflow-hidden shadow-2xl">
                         {/* Top bar */}
@@ -1384,7 +1622,6 @@ export default function Home({
                           {/* Content + aside */}
                           <section className="mt-10 sm:mt-12 grid grid-cols-1 lg:grid-cols-[1.3fr_0.7fr] gap-10 sm:gap-12 items-start">
                             <div className="space-y-10 sm:space-y-14">
-                              {/* Problem / solution */}
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
                                 <div>
                                   <p className="text-[#b98b00] dark:text-[#d6bf24] text-base sm:text-[1.05rem] md:text-[1.35rem] mb-4 sm:mb-5">
@@ -1409,7 +1646,6 @@ export default function Home({
                                 </div>
                               </div>
 
-                              {/* Editorial note */}
                               <div>
                                 <p className="text-zinc-900/80 dark:text-white/80 text-base sm:text-lg md:text-xl leading-[1.8] max-w-4xl">
                                   This detail page is intentionally designed like an editorial
@@ -1419,7 +1655,6 @@ export default function Home({
                                 </p>
                               </div>
 
-                              {/* Secondary visual */}
                               {selectedProject.coverImage && (
                                 <div className="rounded-[1.35rem] sm:rounded-[1.6rem] overflow-hidden border border-[#d8cfc2] dark:border-white/10">
                                   <img
@@ -1433,7 +1668,6 @@ export default function Home({
                                 </div>
                               )}
 
-                              {/* Links */}
                               <div className="pt-2 sm:pt-4 flex flex-wrap gap-3">
                                 {selectedProject.liveUrl && (
                                   <a
@@ -1459,7 +1693,6 @@ export default function Home({
                               </div>
                             </div>
 
-                            {/* Aside */}
                             <aside className="lg:sticky lg:top-8 border-t lg:border-t-0 lg:border-l border-[#d8cfc2] dark:border-white/10 pt-8 lg:pt-0 lg:pl-8 space-y-8 sm:space-y-10">
                               <div>
                                 <p className="text-[#b98b00] dark:text-[#d6bf24] text-base sm:text-lg mb-2">
@@ -1529,6 +1762,7 @@ export default function Home({
             />
 
             <motion.div
+              ref={aboutOverlayRef}
               className="absolute inset-0 overflow-y-auto"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1795,7 +2029,11 @@ export default function Home({
                                     <a
                                       key={`${item.label || "link"}-${index}`}
                                       href={item.url}
-                                      target={item.url?.startsWith("mailto:") ? undefined : "_blank"}
+                                      target={
+                                        item.url?.startsWith("mailto:")
+                                          ? undefined
+                                          : "_blank"
+                                      }
                                       rel={
                                         item.url?.startsWith("mailto:")
                                           ? undefined
@@ -1805,7 +2043,10 @@ export default function Home({
                                     >
                                       {item.icon && (
                                         <img
-                                          src={urlFor(item.icon).width(80).height(80).url()}
+                                          src={urlFor(item.icon)
+                                            .width(80)
+                                            .height(80)
+                                            .url()}
                                           alt={item.label || "Social icon"}
                                           className="h-5 w-5 object-cover rounded-sm"
                                         />
@@ -1823,6 +2064,25 @@ export default function Home({
                   </div>
                 </div>
               </div>
+
+              <AnimatePresence>
+                {showAboutScrollTop && (
+                  <motion.button
+                    type="button"
+                    onClick={() => scrollOverlayToTop(aboutOverlayRef)}
+                    initial={{ opacity: 0, y: 16, scale: 0.92 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 12, scale: 0.96 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.96 }}
+                    className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-[110] inline-flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-black/10 dark:border-white/15 bg-white/85 dark:bg-black/75 backdrop-blur-md text-zinc-900 dark:text-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.35)] hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                    aria-label="Scroll about overlay to top"
+                  >
+                    <span className="text-base sm:text-lg">↑</span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </motion.div>
           </motion.div>
         )}
@@ -1846,7 +2106,7 @@ export default function Home({
             />
 
             <motion.div
-              ref={latestScrollRef}
+              ref={latestOverlayRef}
               className="absolute inset-0 overflow-y-auto"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1921,7 +2181,7 @@ export default function Home({
                           <section className="mt-8 sm:mt-10 border-t border-black/10 dark:border-white/10 pt-8 sm:pt-10">
                             <div className="space-y-10 sm:space-y-12">
                               {selectedNote.sections.map((section, index) => {
-                                const isImageLeft = index % 2 === 1;
+                                const isImageLeft = index % 2 === 1
 
                                 const textBlock = (
                                   <div className="space-y-5 sm:space-y-6">
@@ -1937,7 +2197,7 @@ export default function Home({
                                       </p>
                                     )}
                                   </div>
-                                );
+                                )
 
                                 const imageBlock = (
                                   <div>
@@ -1951,7 +2211,7 @@ export default function Home({
                                       </div>
                                     )}
                                   </div>
-                                );
+                                )
 
                                 return (
                                   <div
@@ -1970,7 +2230,7 @@ export default function Home({
                                       </>
                                     )}
                                   </div>
-                                );
+                                )
                               })}
                             </div>
                           </section>
@@ -2002,11 +2262,11 @@ export default function Home({
                                 key={note._id}
                                 type="button"
                                 onClick={() => {
-                                  setSelectedNote(note);
-                                  latestScrollRef.current?.scrollTo({
+                                  setSelectedNote(note)
+                                  latestOverlayRef.current?.scrollTo({
                                     top: 0,
                                     behavior: "smooth",
-                                  });
+                                  })
                                 }}
                                 className="group grid w-full grid-cols-[1fr_auto] items-start gap-6 border-t border-black/10 dark:border-white/10 py-7 text-left first:border-t-0"
                               >
@@ -2036,11 +2296,31 @@ export default function Home({
                   </div>
                 </div>
               </div>
+
+              <AnimatePresence>
+                {showLatestScrollTop && (
+                  <motion.button
+                    type="button"
+                    onClick={() => scrollOverlayToTop(latestOverlayRef)}
+                    initial={{ opacity: 0, y: 16, scale: 0.92 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 12, scale: 0.96 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.96 }}
+                    className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-[110] inline-flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-black/10 dark:border-white/15 bg-white/85 dark:bg-black/75 backdrop-blur-md text-zinc-900 dark:text-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.35)] hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                    aria-label="Scroll latest overlay to top"
+                  >
+                    <span className="text-base sm:text-lg">↑</span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* Contact Overlay */}
       <AnimatePresence>
         {isContactOpen && (
           <motion.div
@@ -2058,6 +2338,7 @@ export default function Home({
             />
 
             <motion.div
+              ref={contactOverlayRef}
               className="absolute inset-0 overflow-y-auto"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2234,10 +2515,30 @@ export default function Home({
                   </div>
                 </div>
               </div>
+
+              <AnimatePresence>
+                {showContactScrollTop && (
+                  <motion.button
+                    type="button"
+                    onClick={() => scrollOverlayToTop(contactOverlayRef)}
+                    initial={{ opacity: 0, y: 16, scale: 0.92 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 12, scale: 0.96 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.96 }}
+                    className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-[110] inline-flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-black/10 dark:border-white/15 bg-white/85 dark:bg-black/75 backdrop-blur-md text-zinc-900 dark:text-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.35)] hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                    aria-label="Scroll contact overlay to top"
+                  >
+                    <span className="text-base sm:text-lg">↑</span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
     </>
   );
 }

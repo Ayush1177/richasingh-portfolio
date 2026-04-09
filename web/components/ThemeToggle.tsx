@@ -39,7 +39,7 @@ export default function ThemeToggle() {
     <button
       aria-label="Toggle dark mode"
       onClick={toggleTheme}
-      className="inline-flex items-center justify-center rounded-full border border-[#cfc6b8] dark:border-[#8f877b] dark:bg-[#181615]/85 text-zinc-800 dark:text-[#f3efe8] p-2 hover:bg-[#d9cfbf] hover:text-zinc-900 dark:hover:bg-[#24211f] dark:hover:text-white transition-colors"
+      className="inline-flex items-center justify-center rounded-full border border-white/30 dark:border-white/30 bg-[#3e3d3c] dark:bg-[#181615]/85 text-zinc-800 dark:text-[#f3efe8] p-2 hover:bg-black/85 hover:text-zinc-900 dark:hover:bg-white/85 dark:hover:text-white transition-colors"
     >
       {theme === "dark" ? (
         <MoonIcon className="h-4 w-4 text-zinc-700 dark:text-white" />
