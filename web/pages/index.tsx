@@ -492,6 +492,7 @@ export default function Home({
   notes,
   contact,
 }: HomeProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -659,78 +660,143 @@ export default function Home({
         {/* Container Sections */}
         <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-8 sm:pb-10">
           {/* MOBILE / TABLET NAV */}
-          <div className="md:hidden rounded-[1.75rem] border-2 border-white/25 dark:border-white/25 bg-[var(--background)] text-[var(--foreground)] overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/25 dark:border-white/25">
-              <div className="flex items-center gap-3 min-w-0">
-                <motion.img
-                  src="/gif-hero.gif"
-                  alt="Hero icon"
-                  className="h-11 w-11 rounded-full object-cover border border-white/25 dark:border-white/10"
-                  animate={{ x: [-3, 3, -3] }}
-                  transition={{
-                    duration: 1.2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                />
+          <div className="md:hidden">
+            <motion.div
+              layout
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className="rounded-[1.75rem] border-2 border-white/25 dark:border-white/25 bg-[var(--background)] text-[var(--foreground)] overflow-hidden"
+            >
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <motion.img
+                    src="/gif-hero.gif"
+                    alt="Hero icon"
+                    className="h-11 w-11 rounded-full object-cover border border-white/25 dark:border-white/10"
+                    animate={{ x: [-3, 3, -3] }}
+                    transition={{
+                      duration: 1.2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
 
-                <div className="min-w-0">
-                  <p className="text-[10px] uppercase tracking-[0.24em] font-bold dark:font-normal text-zinc-500 dark:text-zinc-400">
-                    Navigation
-                  </p>
-                  <p className="text-sm font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 truncate">
-                    Explore portfolio
-                  </p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase tracking-[0.24em] font-bold dark:font-normal text-zinc-500 dark:text-zinc-400">
+                      Navigation
+                    </p>
+                    <p className="text-sm font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 truncate">
+                      Explore portfolio
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  <ThemeToggle />
+
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+                    aria-expanded={isMobileMenuOpen}
+                    aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                    className="group inline-flex items-center gap-3 rounded-full border border-white/25 dark:border-white/25 px-3 py-2 text-zinc-900 dark:text-zinc-100 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                  >
+                    <span className="text-[11px] uppercase tracking-[0.2em] font-bold dark:font-normal">
+                      {isMobileMenuOpen ? "Close" : "Menu"}
+                    </span>
+
+                    <span className="relative flex h-4 w-4 items-center justify-center">
+                      <motion.span
+                        animate={
+                          isMobileMenuOpen
+                            ? { rotate: 45, y: 0 }
+                            : { rotate: 0, y: -4 }
+                        }
+                        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                        className="absolute h-[1.5px] w-4 rounded-full bg-current"
+                      />
+                      <motion.span
+                        animate={
+                          isMobileMenuOpen
+                            ? { rotate: -45, y: 0 }
+                            : { rotate: 0, y: 4 }
+                        }
+                        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                        className="absolute h-[1.5px] w-4 rounded-full bg-current"
+                      />
+                    </span>
+                  </button>
                 </div>
               </div>
 
-              <div className="flex-shrink-0">
-                <ThemeToggle />
-              </div>
-            </div>
+              <AnimatePresence initial={false}>
+                {isMobileMenuOpen && (
+                  <motion.div
+                    key="mobile-nav-panel"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden border-t border-white/25 dark:border-white/25"
+                  >
+                    <div className="px-3 pb-3 pt-3">
+                      <div className="flex flex-col gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsProjectsOpen(true)
+                            setIsMobileMenuOpen(false)
+                          }}
+                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        >
+                          Projects
+                        </button>
 
-            <div className="px-3 py-3">
-              <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                <button
-                  type="button"
-                  onClick={() => setIsProjectsOpen(true)}
-                  className="shrink-0 rounded-full border border-white/25 dark:border-white/10 px-4 py-2 text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
-                  Projects
-                </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsAboutOpen(true)
+                            setIsMobileMenuOpen(false)
+                          }}
+                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        >
+                          About
+                        </button>
 
-                <button
-                  type="button"
-                  onClick={() => setIsAboutOpen(true)}
-                  className="shrink-0 rounded-full border border-white/25 dark:border-white/10 px-4 py-2 text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
-                  About
-                </button>
+                        <a
+                          href="#playground"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        >
+                          Playground
+                        </a>
 
-                <a
-                  href="#playground"
-                  className="shrink-0 rounded-full border border-white/25 dark:border-white/10 px-4 py-2 text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
-                  Playground
-                </a>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            openLatest()
+                            setIsMobileMenuOpen(false)
+                          }}
+                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        >
+                          Latest
+                        </button>
 
-                <button
-                  type="button"
-                  onClick={openLatest}
-                  className="shrink-0 rounded-full border border-white/25 dark:border-white/10 px-4 py-2 text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
-                  Latest
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsContactOpen(true)}
-                  className="shrink-0 rounded-full border border-white/25 dark:border-white/10 px-4 py-2 text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
-                  Contact
-                </button>
-              </div>
-            </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsContactOpen(true)
+                            setIsMobileMenuOpen(false)
+                          }}
+                          className="w-full rounded-full border border-white/25 dark:border-white/25 px-4 py-3 text-left text-[10px] uppercase tracking-[0.18em] font-bold dark:font-normal text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        >
+                          Contact
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           </div>
 
           {/* DESKTOP NAV */}
